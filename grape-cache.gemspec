@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Grape::Cache::VERSION
   spec.authors       = ["AMar4enko"]
   spec.email         = ["amar4enko@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = 'Basic Api Cache Middleware for grape'
+  spec.description   = ''
   spec.homepage      = ""
   spec.license       = "MIT"
 
