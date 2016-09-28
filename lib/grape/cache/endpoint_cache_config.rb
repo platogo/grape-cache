@@ -33,7 +33,7 @@ module Grape
         # First cache barrier - 304 cache responses for ETag and If-Last-Modified
         @prepare_block && endpoint.instance_eval(&@prepare_block)
         check_etag(endpoint)
-        check_modified_since(endpoint)
+        check_modified_since(endpoint, middleware.timeformat)
 
         # If here, no HTTP cache hits occured
         # Retreive request metadata
@@ -80,16 +80,16 @@ module Grape
         build_cache_headers(endpoint, {'ETag' => @etag})
       end
 
-      def check_modified_since(endpoint)
+      def check_modified_since(endpoint, timeformat)
         return unless @last_modified_block
         @last_modified = endpoint.instance_eval(&@last_modified_block)
 
-        if_modified = endpoint.env['HTTP_IF_MODIFIED_SINCE'] && Time.httpdate(endpoint.env['HTTP_IF_MODIFIED_SINCE'])
-        if_unmodified = endpoint.env['HTTP_IF_UNMODIFIED_SINCE'] && Time.httpdate(endpoint.env['HTTP_IF_UNMODIFIED_SINCE'])
+        if_modified = endpoint.env['HTTP_IF_MODIFIED_SINCE'] && Time.send(timeformat, endpoint.env['HTTP_IF_MODIFIED_SINCE'])
+        if_unmodified = endpoint.env['HTTP_IF_UNMODIFIED_SINCE'] && Time.send(timeformat, endpoint.env['HTTP_IF_UNMODIFIED_SINCE'])
 
-        throw :cache_hit, Rack::Response.new([], 304, 'Last-Modified' => @last_modified.httpdate) if if_modified and (@last_modified <= if_modified)
-        throw :cache_hit, Rack::Response.new([], 304, 'Last-Modified' => @last_modified.httpdate) if if_unmodified and (@last_modified > if_unmodified)
-        build_cache_headers(endpoint, {'Last-Modified' => @last_modified.httpdate})
+        throw :cache_hit, Rack::Response.new([], 304, 'Last-Modified' => @last_modified.send(timeformat)) if if_modified and (@last_modified <= if_modified)
+        throw :cache_hit, Rack::Response.new([], 304, 'Last-Modified' => @last_modified.send(timeformat)) if if_unmodified and (@last_modified > if_unmodified)
+        build_cache_headers(endpoint, {'Last-Modified' => @last_modified.send(timeformat)})
       end
 
       def create_capture_metadata(endpoint)

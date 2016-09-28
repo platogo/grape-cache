@@ -3,12 +3,12 @@ require_relative 'backend/memory'
 module Grape
   module Cache
     class Middleware < Grape::Middleware::Base
-      attr_accessor :backend
+      attr_accessor :backend, :timeformat
 
-      def initialize(*args)
-        options = {backend: Grape::Cache::Backend::Memory.new}.merge(args.extract_options!)
-        @app = args.first
-        @backend = options[:backend]
+      def initialize(app, backend: nil, timeformat: :httpdate)
+        @app = app
+        @backend = backend || Grape::Cache::Backend::Memory.new
+        @timeformat = timeformat
       end
 
       def call!(env)
