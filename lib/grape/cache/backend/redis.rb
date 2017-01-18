@@ -14,10 +14,10 @@ module Grape
         def store(key, response, metadata)
           args = [key, 'status', response.status.to_s, 'headers', Marshal.dump(response.headers), 'body', Marshal.dump(response.body), 'metadata', Marshal.dump(metadata)]
           if metadata.expire_at
-            storage.multi
-            storage.hmset(*args)
-            storage.expireat key, metadata.expire_at.to_i
-            storage.exec
+            storage.multi do |r|
+              r.hmset(*args)
+              r.expireat key, metadata.expire_at.to_i
+            end
           else
             storage.hmset(*args)
           end
