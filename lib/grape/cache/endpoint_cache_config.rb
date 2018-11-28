@@ -15,6 +15,10 @@ module Grape
         @prepare_block = block
       end
 
+      def skip_cache(&block)
+        @skip_cache_block = block
+      end
+
       def cache_key(&block)
         @cache_key_block = block
       end
@@ -32,6 +36,8 @@ module Grape
       def validate_cache(endpoint, middleware)
         # First cache barrier - 304 cache responses for ETag and If-Last-Modified
         @prepare_block && endpoint.instance_eval(&@prepare_block)
+
+        return if @skip_cache_block && endpoint.instance_eval(&@skip_cache_block)
         check_etag(endpoint)
         check_modified_since(endpoint)
 
