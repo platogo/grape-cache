@@ -71,11 +71,12 @@ module Grape
         cache_key_ary = cache_key_array(endpoint)
         cache_key_block = @cache_key_block
         [
+            @etag,
             endpoint.env['REQUEST_METHOD'].to_s,
             endpoint.env['PATH_INFO'],
             endpoint.env['HTTP_ACCEPT_VERSION'].to_s,
             Digest::MurmurHash64B.hexdigest((cache_key_block ? endpoint.instance_exec(cache_key_ary, &cache_key_block) : cache_key_ary).to_s)
-        ].inject(&:+)
+        ].compact.inject(&:+)
       end
 
       def check_etag(endpoint)
