@@ -5,6 +5,8 @@ require "grape/cache/backend/memory"
 
 module Grape
   class API
-    include Grape::Cache::DSL
+    class Instance
+      include Grape::Cache::DSL
+    end  
   end
 end
