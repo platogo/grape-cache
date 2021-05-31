@@ -5,9 +5,9 @@ module Grape
     class Middleware < Grape::Middleware::Base
       attr_accessor :backend
 
-      def initialize(app, backend: nil)
-        @app = app
-        @backend = backend || Grape::Cache::Backend::Memory.new
+      def initialize(app, *options)
+        super
+        @backend = @options[:backend] || Grape::Cache::Backend::Memory.new
       end
 
       def call!(env)
@@ -21,4 +21,3 @@ module Grape
     end
   end
 end
-
