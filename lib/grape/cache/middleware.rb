@@ -5,7 +5,7 @@ module Grape
     class Middleware < Grape::Middleware::Base
       attr_accessor :backend
 
-      def initialize(app, *options)
+      def initialize(app, **options)
         super
         @backend = @options[:backend] || Grape::Cache::Backend::Memory.new
       end
