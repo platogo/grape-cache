@@ -12,14 +12,23 @@ module Grape
         # @param response[Rack::Response]
         # @param metadata[Grape::Cache::Backend::CacheEntryMetadata] Entry metadata
         def store(key, response, metadata)
-          args = [key, 'status', response[0].to_s, 'headers', Marshal.dump(response[1]), 'body', Marshal.dump(response[2]), 'metadata', Marshal.dump(metadata)]
+          status, headers, body = response.respond_to?(:to_a) ? response.to_a : response
+
+          payload = {
+            'status' => status.to_s,
+            'headers' => Marshal.dump(headers),
+            'body' => Marshal.dump(body),
+            'metadata' => Marshal.dump(metadata)
+          }
+
+          payload_args = payload.flat_map { |k, v| [k, v] }
           if metadata.expire_at
             storage.multi do |r|
-              r.hmset(*args)
+              r.hset(key, *payload_args)
               r.expireat key, metadata.expire_at.to_i
             end
           else
-            storage.hmset(*args)
+            storage.hset(key, *payload_args)
           end
         end
         def fetch(key)

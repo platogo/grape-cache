@@ -5,8 +5,12 @@ module Grape
     class Middleware < Grape::Middleware::Base
       attr_accessor :backend
 
-      def initialize(app, *options)
-        super
+      def initialize(app, *args, **kwargs)
+        positional_options = args.last.is_a?(Hash) ? args.pop : {}
+        merged_options = positional_options.merge(kwargs)
+
+        super(app, *args, **merged_options)
+
         @backend = @options[:backend] || Grape::Cache::Backend::Memory.new
       end
 

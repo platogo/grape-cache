@@ -27,6 +27,10 @@ module Grape
         @etag_check_block = block
       end
 
+      def client_cache_only(&block)
+        @client_cache_only_block = block
+      end
+
       def last_modified(&block)
         @last_modified_block = block
       end
@@ -40,6 +44,7 @@ module Grape
         return if @skip_cache_block && endpoint.instance_eval(&@skip_cache_block)
         check_etag(endpoint)
         check_modified_since(endpoint)
+        return if @client_cache_only_block && endpoint.instance_eval(&@client_cache_only_block)
 
         # If here, no HTTP cache hits occured
         # Retreive request metadata
@@ -64,7 +69,11 @@ module Grape
 
       private
       def cache_key_array(endpoint)
+        return endpoint.params unless endpoint.respond_to?(:declared)
+
         endpoint.declared(endpoint.params)
+      rescue StandardError
+        endpoint.params
       end
 
       def create_cache_key(endpoint)
